@@ -28,15 +28,15 @@
 #include <math.h>
 #include <algorithm>
 
-#include "Eigen/Dense"
-#include "Eigen/Sparse"
-#include "Eigen/Core"
-#include "Eigen/OrderingMethods"
-#include "Eigen/SparseQR"
+#include "../dependency/Eigen/Dense"
+#include "../dependency/Eigen/Sparse"
+#include "../dependency/Eigen/Core"
+#include "../dependency/Eigen/OrderingMethods"
+#include "../dependency/Eigen/SparseQR"
 
 #include <ctime>
-//#include <sys/time.h>   // this is for linux machine
-#include <windows.h> // this is for windows machine
+#include <sys/time.h>   // this is for linux machine
+//#include <windows.h> // this is for windows machine
 
 
 

@@ -8,7 +8,6 @@
 *
 * All rights reserved.
 *******************************************************/
-#pragma once
 #include "stdafx.h"
 using namespace Eigen;
 using namespace std;

@@ -8,7 +8,6 @@
 *
 * All rights reserved.
 *******************************************************/
-#pragma once
 #include "stdafx.h"
 extern double alpha0;
 extern int KHID;
