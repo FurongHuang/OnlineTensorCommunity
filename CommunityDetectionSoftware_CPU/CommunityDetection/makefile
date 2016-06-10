@@ -7,7 +7,7 @@ NA=65879
 NB=65879
 NC=65880
 KHID=10
-ALPHA0=0.001
+ALPHA0=0.0001
 INDEXSTART=1
 DATAFOLDER=../data
 Data_xa=Gx_a.txt
@@ -25,7 +25,7 @@ community: CommunityDetection.cpp IOfn.cpp Probability.cpp Pvalue.cpp Spectral.c
 	g++ -o $@ $^ $(COPTZ) $(SUPP_WARN) -DNDEBUG -std=c++0x
 
 run:
-	./community $(NX) $(NA) $(NB) $(NC) $(KHID)  $(ALPHA0) $(INDEXSTART)  $(DATAFOLDER)/$(Data_xa) $(DATAFOLDER)/$(Data_xb) $(DATAFOLDER)/$(Data_xc) $(DATAFOLDER)/$(Data_ba) $(DATAFOLDER)/$(Data_ca) $(RESULTFOLDER)/$(EIGENVAL) $(RESULTFOLDER)/$(white) $(RESULTFOLDER)/$(membership)
+	./community $(NX) $(NA) $(NB) $(NC) $(KHID)  $(ALPHA0) $(INDEXSTART)  $(DATAFOLDER)/$(Data_xa) $(DATAFOLDER)/$(Data_xb) $(DATAFOLDER)/$(Data_xc) $(DATAFOLDER)/$(Data_ba) $(DATAFOLDER)/$(Data_ca) $(RESULTFOLDER)/$(membership) $(RESULTFOLDER)/$(white)
 
 clean:
 	rm community
