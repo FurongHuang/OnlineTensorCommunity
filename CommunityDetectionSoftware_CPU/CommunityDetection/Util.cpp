@@ -59,21 +59,14 @@ void second_whiten(SparseMatrix<double> Gx_a, SparseMatrix<double> Gx_b, SparseM
 	Z_C_numerator = inv_nx *  Z_C_numerator;       // NA * NB
 	SparseMatrix<double> Z_C_denominator = Gx_c.transpose()*Gx_b;//NC * NB
 	Z_C_denominator = inv_nx * Z_C_denominator;//NC * NB
-//	cout << "-----------Z_B_numerator:nonZeros()" << Z_B_numerator.nonZeros() << "-------------" << endl;
-//	cout << "-----------Z_B_denominator:nonZeros()" << Z_B_denominator.nonZeros() << "-------------" << endl;
-//	cout << "-----------Z_C_numerator:nonZeros()" << Z_C_numerator.nonZeros() << "-------------" << endl;
-//	cout << "-----------Z_C_denominator:nonZeros()" << Z_C_denominator.nonZeros() << "-------------" << endl;
+	
 
 
 	pair<pair<SparseMatrix<double>, SparseMatrix<double> >, SparseMatrix<double> > V_invL_Utrans_Zc = pinv_Nystrom_sparse_component(Z_C_denominator);
 	//X_pinv = V_invL_Utrans.first.first * V_invL_Utrans.second * V_invL_Utrans.first.second;
 	pair<pair<SparseMatrix<double>, SparseMatrix<double> >, SparseMatrix<double> > V_invL_Utrans_Zb = pinv_Nystrom_sparse_component(Z_B_denominator);
-//	cout << "-----------V_invL_Utrans_Zc.first.first:nonZeros()" << V_invL_Utrans_Zc.first.first.nonZeros() << "-------------" << endl;
-//	cout << "-----------V_invL_Utrans_Zc.first.second:nonZeros()" << V_invL_Utrans_Zc.first.second.nonZeros() << "-------------" << endl;
-//	cout << "-----------V_invL_Utrans_Zc.second:nonZeros()" << V_invL_Utrans_Zc.second.nonZeros() << "-------------" << endl;
-//	cout << "-----------V_invL_Utrans_Zb.first.first:nonZeros()" << V_invL_Utrans_Zb.first.first.nonZeros() << "-------------" << endl;
-//	cout << "-----------V_invL_Utrans_Zb.first.second:nonZeros()" << V_invL_Utrans_Zb.first.second.nonZeros() << "-------------" << endl;
-//	cout << "-----------V_invL_Utrans_Zb.second:nonZeros()" << V_invL_Utrans_Zb.second.nonZeros() << "-------------" << endl;
+
+	
 
 	//    cout << "--------------starting to calculate Z_B, Z_C ---------------------------"<< endl;
 	// compute M2 Main Term
@@ -82,8 +75,7 @@ void second_whiten(SparseMatrix<double> Gx_a, SparseMatrix<double> Gx_b, SparseM
 	SparseMatrix<double> term_na_k = (Z_C_numerator * V_invL_Utrans_Zc.first.first) * V_invL_Utrans_Zc.second;
 	Z_C_part1 = term_na_k;
 	Z_C_part2 = V_invL_Utrans_Zc.first.second;
-//	cout << "-----------Z_C_part1:nonZeros()" << Z_C_part1.nonZeros() << "-------------" << endl;
-//	cout << "-----------Z_C_part2:nonZeros()" << Z_C_part2.nonZeros() << "-------------" << endl;
+
 
 	// k by k term: 
 	SparseMatrix<double> term_k_k = (V_invL_Utrans_Zc.first.second * Z_C_denominator) * V_invL_Utrans_Zb.first.second.transpose();
@@ -95,33 +87,34 @@ void second_whiten(SparseMatrix<double> Gx_a, SparseMatrix<double> Gx_b, SparseM
 	SparseMatrix<double> term_k_na = (V_invL_Utrans_Zb.second * V_invL_Utrans_Zb.first.first.transpose()) * Z_B_numerator.transpose();
 	Z_B_part1 = term_k_na.transpose();
 	Z_B_part2 = V_invL_Utrans_Zb.first.second;
-//	cout << "-----------Z_B_part1:nonZeros()" << Z_B_part1.nonZeros() << "-------------" << endl;
-//	cout << "-----------Z_B_part2:nonZeros()" << Z_B_part2.nonZeros() << "-------------" << endl;
+
 
 
 	SparseMatrix<double> RandomMat = random_embedding_mat(mu_a_sparse.size(), 2 * KHID);
 	SparseMatrix<double> M2 = (term_na_k * term_k_k) * (term_k_na * RandomMat); M2 = para_main * M2;
-//	cout << "-----------term_na_k:nonZeros()" << term_na_k.nonZeros() << "-------------" << endl;
-//	cout << "-----------term_k_k:nonZeros()" << term_k_k.nonZeros() << "-------------" << endl;
-//	cout << "-----------term_k_na:nonZeros()" << term_k_na.nonZeros() << "-------------" << endl;
 	// compute M2 Shift Term
 	double para_shift = alpha0;
 	//    cout <<"-------------------computing square_mu_a_sparse--------"<<endl;
 
 	SparseMatrix<double> shiftTerm = mu_a_sparse * (mu_a_sparse.transpose() * RandomMat); shiftTerm = para_shift * shiftTerm;
 	SparseMatrix<double> M2_a = M2 - shiftTerm;
-//    cout << "-----------M2_alpha0:nonZeros()" << M2_a.nonZeros()<< "-------------"<<endl;
+
+    
 
 	pair< SparseMatrix<double>, SparseVector<double> > Vw_Lw = SVD_symNystrom_sparse(M2_a);
 	SparseMatrix<double> Uw = Vw_Lw.first.leftCols(KHID);
 	VectorXd Lw = (VectorXd)Vw_Lw.second;
+
 	Lw = pinv_vector(Lw.head(KHID).cwiseSqrt());
+
+	
 	MatrixXd diag_Lw_sqrt_inv = Lw.asDiagonal();
 	SparseMatrix<double> diag_Lw_sqrt_inv_s = diag_Lw_sqrt_inv.sparseView();
+
+	
 	W.resize(Gx_a.cols(), KHID);
 	W = Uw * diag_Lw_sqrt_inv_s;
-//	cout << "---------------------dimension of W : " << W.rows() << " , " << W.cols() << "----------------" << endl;
-//	cout << "-----------End of Whitening----------nonZeros() of W : " << W.nonZeros() << endl;
+	cout << "-----------End of Whitening----------" << endl;
 
 }
 
@@ -143,33 +136,32 @@ void tensorDecom_alpha0(SparseMatrix<double> D_a_mat, VectorXd D_a_mu, SparseMat
 	SparseMatrix<double> pair_ab = D_a_mat * D_b_mat.transpose(); MatrixXd Pair_ab = (MatrixXd)pair_ab;
 	SparseMatrix<double> pair_ac = D_a_mat * D_c_mat.transpose(); MatrixXd Pair_ac = (MatrixXd)pair_ac;
 	SparseMatrix<double> pair_bc = D_b_mat * D_c_mat.transpose(); MatrixXd Pair_bc = (MatrixXd)pair_bc;
-//	cout << "one sample a: " << (VectorXd) D_a_mat.block(0, 0, KHID, 1) << endl;
-//	cout << "one sample b: " << (VectorXd) D_b_mat.block(0, 0, KHID, 1) << endl;
-//	cout << "one sample c: " << (VectorXd) D_c_mat.block(0, 0, KHID, 1) << endl;
-	A_random.resize(0, 0);
+	//cout << "one sample a: " << (VectorXd) D_a_mat.block(0, 0, KHID, 1) << endl;
+	//cout << "one sample b: " << (VectorXd) D_b_mat.block(0, 0, KHID, 1) << endl;
+	//cout << "one sample c: " << (VectorXd) D_c_mat.block(0, 0, KHID, 1) << endl;
 	long iteration = 1;
-//	cout << "phi_new: " << phi_new << endl;
+	cout << "whitened_eigenvectors_initial_values: " << phi_new << endl;
 	while (true)
 	{
 		long iii = iteration % NX;
 		phi_old = phi_new;
 		for (int index_k = 0; index_k < KHID; index_k++){
 			VectorXd curr_eigenvec = phi_old.col(index_k);
-			phi_new.col(index_k) = para_main * tensor_form_main(D_a_mat, D_b_mat, D_c_mat, curr_eigenvec) \
+			phi_new.col(index_k) = phi_old.col(index_k) - LEARNRATE * (para_main * tensor_form_main(D_a_mat, D_b_mat, D_c_mat, curr_eigenvec) \
 				+ para_shift1 * tensor_form_shift1(Pair_ab, Pair_ac, Pair_bc, D_a_mu, D_b_mu, D_c_mu, curr_eigenvec)\
-				+ para_shift0*tensor_form_shift0(D_a_mu, D_b_mu, D_c_mu, curr_eigenvec);
+				+ para_shift0*tensor_form_shift0(D_a_mu, D_b_mu, D_c_mu, curr_eigenvec));
 
 		}
-//		cout << "phi_new: " << phi_new << endl;
+		// cout << "phi_new: " << phi_new << endl;
 		lambda = (((phi_new.array().pow(2)).colwise().sum()).pow(3.0 / 2.0)).transpose();
 		phi_new = normc(phi_new);
-//		cout << "phi_new: " << phi_new << endl;
-//		cout << "lambda: " << lambda << endl;
+		// cout << "phi_new_normc: " << phi_new << endl;
+		// cout << "lambda: " << lambda << endl;
 		if (iteration < MINITER){}
 		else
 		{
 			error = (phi_new - phi_old).norm();
-//			cout << "error: " << error << endl;
+			// cout << "error: " << error << endl;
 			if (error < TOLERANCE || iteration > MAXITER)
 			{
 				cout << " coverged iteration: " << iteration << endl;
